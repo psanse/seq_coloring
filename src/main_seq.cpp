@@ -23,16 +23,29 @@ struct BaseSeq{
 	std::vector<int> lc_;				//[vertex_index] -> color number --- standard color encoding 
 
 	int nV_;							//number of vertices
-	int nCol_;							//number of colors of the current coloring
-	int maxCol_;						//maximum number of colors of the current coloring
+	int maxCol_; 						//maximum number of colors of the current 
+	int nCol_ = 0;						//number of colors of the current coloring
 
 	//construction / destruction
-	BaseSeq(int size, int MAX_COL = size) :
+	BaseSeq(int size, int MAX_COL) :
 		nV_{ size },
 		maxCol_{ MAX_COL },
 		lc_((int)size, 0),
 		bbc_(MAX_COL, BitSet_t{ size })		//internally, color numbers range from [0 , maxCol_)
 	{}
+
+	BaseSeq(int size) :
+		nV_{ size },
+		lc_((int)size, 0),
+		maxCol_{ -1 }		
+	{}
+
+	BaseSeq() : nV_(-1), maxCol_(-1) {}
+
+	//setters and getters	
+	int number_of_vertices_colored() const { return nV_; }
+	int maximum_number_of_colors() const { return maxCol_; }
+	int number_of_colors() const { return nCol_; }
 
 	//interface
 	virtual int seq_coloring(const ugraph& ug, BitSet_t bbsg) = 0;
@@ -41,7 +54,16 @@ struct BaseSeq{
 
 };
 
+template<class BitSet_t>
+class SEQ_Tomita : public BaseSeq<BitSet_t> {
 
+	//inherit constructor
+	using BaseSeq<BitSet_t>::BaseSeq;
+
+	//TODO...
+
+};
+							
 template<class BitSet_t>
 class SEQ {
 
