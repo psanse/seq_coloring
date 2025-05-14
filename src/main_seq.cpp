@@ -17,6 +17,30 @@ using namespace std;
 
 #include <cassert>
 
+template<class BitSet_t>
+struct BaseSeq{
+	std::vector<BitSet_t> bbc_;			//list of color (bit)sets.
+	std::vector<int> lc_;				//[vertex_index] -> color number --- standard color encoding 
+
+	int nV_;							//number of vertices
+	int nCol_;							//number of colors of the current coloring
+	int maxCol_;						//maximum number of colors of the current coloring
+
+	//construction / destruction
+	BaseSeq(int size, int MAX_COL = size) :
+		nV_{ size },
+		maxCol_{ MAX_COL },
+		lc_((int)size, 0),
+		bbc_(MAX_COL, BitSet_t{ size })		//internally, color numbers range from [0 , maxCol_)
+	{}
+
+	//interface
+	virtual int seq_coloring(const ugraph& ug, BitSet_t bbsg) = 0;
+	virtual int seq_coloring(const ugraph& ug, std::vector<int> lvsg) = 0;
+	virtual int seq_coloring(const ugraph& ug) = 0;
+
+};
+
 
 template<class BitSet_t>
 class SEQ {
@@ -24,16 +48,16 @@ class SEQ {
 	std::vector<BitSet_t> bbc_;						//list of color (bit)sets.
 	std::vector<int> lc_;							//[vertex_index] -> color number --- standard color encoding 
 
-	int nV_;								//number of vertices	
-	int maxCol_;							//maximum number of colors
-	int nCol_ = 0;							//number of colors of the current coloring
+	int nV_;										//number of vertices	
+	int maxCol_;									//maximum number of colors
+	int nCol_ = 0;									//number of colors of the current coloring
 public:
 	//construction / destruction
 	SEQ(int size, int MAX_COL = size) :
 		nV_{ size },
 		maxCol_{ MAX_COL },
-		lc_((int)size, 0),
-		bbc_(MAX_COL, BitSet_t{ size })		//internally, color numbers range from [0 , maxCol_)
+		lc_( (int)size, 0 ),
+		bbc_(MAX_COL, BitSet_t{ size })				//internally, color numbers range from [0 , maxCol_)
 	{}
 
 	//copy and move constructors forbidden
