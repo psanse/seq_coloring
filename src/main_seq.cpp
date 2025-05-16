@@ -17,6 +17,13 @@ using namespace std;
 
 #include <cassert>
 
+///////////////////////
+//
+// Base class for greedy sequential coloring heuristic
+// (a vertex is colored at each iteration)
+//
+///////////////////////
+
 template<class BitSet_t>
 struct BaseSeq{
 	std::vector<BitSet_t> bbc_;			//list of color (bit)sets.
@@ -30,7 +37,7 @@ struct BaseSeq{
 	BaseSeq(int size, int MAX_COL) :
 		nV_{ size },
 		maxCol_{ MAX_COL },
-		lc_((int)size, 0),
+		lc_(size, 0),
 		bbc_(MAX_COL, BitSet_t{ size })		//internally, color numbers range from [0 , maxCol_)
 	{}
 
@@ -54,11 +61,58 @@ struct BaseSeq{
 
 };
 
+
+///////////////////////
+//
+// Base class for greedy independent set sequential coloring heuristic
+// (color isets are computed at each iteration)
+//
+///////////////////////
+
 template<class BitSet_t>
-class SEQ_Tomita : public BaseSeq<BitSet_t> {
+struct BaseIsetSeq {
+	BitSet_t bbSel_;					//color iset under construction
+	BitSet_t bbUnsel_;					//bitset of uncolored vertices.
+	std::vector<int> lc_;				//[vertex_index] -> color number --- standard color encoding 
+
+	int nV_;							//number of vertices
+	int nCol_ = 0;						//number of colors of the current coloring
+
+	//construction / destruction
+	BaseIsetSeq(int size) :
+		bbSel_{ size },
+		bbUnsel_{ size },
+		lc_(size, 0)
+	{}
+			
+
+	//setters and getters	
+	int number_of_vertices_colored() const { return nV_; }
+	int number_of_colors() const { return nCol_; }
+
+	//interface
+	virtual int seq_coloring(const ugraph& ug, BitSet_t bbsg) = 0;
+	virtual int seq_coloring(const ugraph& ug, std::vector<int> lvsg) = 0;
+	virtual int seq_coloring(const ugraph& ug) = 0;
+
+};
+
+
+template<class BitSet_t>
+class seq : public BaseSeq<BitSet_t> {
 
 	//inherit constructor
 	using BaseSeq<BitSet_t>::BaseSeq;
+
+	//TODO...
+
+};
+
+template<class BitSet_t>
+class seqIset : public BaseIsetSeq<BitSet_t> {
+
+	//inherit constructor
+	using BaseIsetSeq<BitSet_t>::BaseIsetSeq;
 
 	//TODO...
 
