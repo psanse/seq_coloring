@@ -61,6 +61,12 @@ struct BaseSeq{
 
 };
 
+///////////////////////
+//
+// Base class for greedy independent set sequential coloring heuristic
+//
+///////////////////////
+
 template<class Grapht_t = ugraph>
 class baseSeq {
 public:
@@ -84,16 +90,18 @@ protected:
 	int nCol_ = 0;						//number of colors of the current coloring
 };
 
+
 ///////////////////////
 //
-// Base class for greedy independent set sequential coloring heuristic
-// (color isets are computed at each iteration)
+// class seqIset
+// (computes greedy independent set sequential coloring heuristic for 
+// ugraph types) 
 //
 ///////////////////////
 
 class seqIset : public  baseSeq<ugraph> {
 
-	using bitset = typename ugraph::_bbt;
+	using bitset = typename ugraph::_bbt;	//bitset type
 
 public:
 	//construction / destruction
@@ -150,13 +158,20 @@ public:
 		return this->nCol_;
 	}
 
-	/////////
-	//data members
+/////////
+//data members
 private:
 	bitset bbSel_;					//color iset under construction
 	bitset bbUnsel_;					//set of uncolored vertices
 };
 
+
+///////////////////
+//
+// Greedy sequential coloring heuristic
+// TODO - refactor (17/05/2025)
+//
+//////////////////
 							
 template<class BitSet_t>
 class SEQ {
