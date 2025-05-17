@@ -63,11 +63,6 @@ struct BaseSeq{
 
 template<class Grapht_t = ugraph>
 class baseSeq {
-protected:
-	const Grapht_t& ug_;				//input graph
-	std::vector<int> lc_;				//[vertex_index] -> color number --- standard color encoding 
-	int nCol_ = 0;						//number of colors of the current coloring
-
 public:
 	
 	//construction / destruction
@@ -82,6 +77,11 @@ public:
 	int number_of_colors()	const { return nCol_; }
 	int color(int v)		const { return lc_[v]; }	
 	const ugraph& graph()	const { return ug_; }
+
+protected:
+	const Grapht_t& ug_;				//input graph
+	std::vector<int> lc_;				//[vertex_index] -> color number --- standard color encoding 
+	int nCol_ = 0;						//number of colors of the current coloring
 };
 
 ///////////////////////
