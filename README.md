@@ -1,2 +1,2 @@
-# seq_coloring
+# Greedy Sequential coloring heuristics
 greedy sequential coloring
