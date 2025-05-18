@@ -1,50 +1,84 @@
 /**
 * @file test_seq_coloring.cpp
 * @brief Unit tests for sequential coloring
-* @details created 11/05/2025
-* @author pss
+* @details created 18/05/2025
+* @dev pss
 **/
 
 #include "gtest/gtest.h"
-#include "graph/graph.h"
-
+#include "seq_coloring.h"
 
 #include <iostream>
 
 using namespace std;
 
-//
-//
-//TEST(Coloring, SEQ_Iset) {
-//
-//
-//	const int NV = 6;
-//
-//	ugraph ug(NV);
-//	ug.add_edge(0, 1);
-//	ug.add_edge(0, 3);
-//	ug.add_edge(0, 4);
-//	ug.add_edge(2, 5);
-//	ug.add_edge(3, 4);
-//
-//
-//	SEQ
-//
-//	std::vector<int> clq;
-//	//typename ugraph::_bbt bbsg{ static_cast<int>(ug.size()), { 0, 1, 2, 3, 4, 5} };
-//
-//
-//	////////////////////////////////////////
-//	int ub[NV];
-//	int nCol = gfunc::clq::SEQ(ug, bbsg, ub);
-//	///////////////////////////////////////
-//
-//	EXPECT_EQ(3, nCol);		//{0, 2} {1, 3, 5} {4} - 3 colors
-//	EXPECT_EQ(1, ub[0]);
-//	EXPECT_EQ(1, ub[2]);
-//	EXPECT_EQ(2, ub[1]);
-//	EXPECT_EQ(2, ub[3]);
-//	EXPECT_EQ(2, ub[5]);
-//	EXPECT_EQ(3, ub[4]);
-//
-//}
+class SeqColorTest : public ::testing::Test {
+protected:
+	void SetUp() override {
+		ug.reset(NV);
+		ug.add_edge(0, 1);
+		ug.add_edge(1, 2);
+		ug.add_edge(2, 3);
+		ug.add_edge(1, 3);
+	}
+	void TearDown() override {}
+
+	//directed graph instance	
+	const int NV = 5;
+	ugraph ug;
+};
+
+TEST_F(SeqColorTest, seqIset) {
+
+	////////////////////////////
+	//color a subset of vertices
+	typename ugraph::_bbt bbsg{ NV, {1, 2, 4} };
+
+	seqIset sqI(ug);
+	int nCol = sqI.seq_coloring(&bbsg);
+	
+	EXPECT_EQ(sqI.number_of_colors(), 2);
+	EXPECT_EQ(sqI.color(1), 1);
+	EXPECT_EQ(sqI.color(2), 2);
+	EXPECT_EQ(sqI.color(4), 1);
+
+	////////////////////////////
+	//color the full graph
+	nCol = sqI.seq_coloring();
+
+	EXPECT_EQ(sqI.number_of_colors(), 3);
+	EXPECT_EQ(sqI.color(0), 1);
+	EXPECT_EQ(sqI.color(1), 2);
+	EXPECT_EQ(sqI.color(2), 1);
+	EXPECT_EQ(sqI.color(3), 3);
+	EXPECT_EQ(sqI.color(4), 1);
+
+}
+
+TEST_F(SeqColorTest, seq) {
+
+	////////////////////////////
+	//color a subset of vertices
+	std::vector<int> sg = { 1, 2, 4 };
+
+	seq sq(ug, sg.size());
+	int nCol = sq.seq_coloring(&sg);
+
+	EXPECT_EQ(sq.number_of_colors(), 2);
+	EXPECT_EQ(sq.color(1), 1);
+	EXPECT_EQ(sq.color(2), 2);
+	EXPECT_EQ(sq.color(4), 1);
+
+	////////////////////////////
+	//color the full graph
+	nCol = sq.seq_coloring();
+
+	EXPECT_EQ(sq.number_of_colors(), 3);
+	EXPECT_EQ(sq.color(0), 1);
+	EXPECT_EQ(sq.color(1), 2);
+	EXPECT_EQ(sq.color(2), 1);
+	EXPECT_EQ(sq.color(3), 3);
+	EXPECT_EQ(sq.color(4), 1);
+
+}
+

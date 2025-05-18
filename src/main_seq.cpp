@@ -12,7 +12,7 @@ using namespace std;
 
 
 /////////////////
-// unit tests
+// executable - see also unit tests
 
 int main() {
 	const int SIZE = 5;

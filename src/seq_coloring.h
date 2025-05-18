@@ -179,6 +179,7 @@ public:
 		//main loop
 		this->nCol_ = 1;
 		bool open_color = false;
+		bbc_[this->nCol_].erase_bit();							//cleans the first bitset color (must be open)
 		for (const auto& v : uncol) {
 
 			//find first open bit color set with no vertices adjacent to v
