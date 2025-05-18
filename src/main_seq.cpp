@@ -95,15 +95,15 @@ protected:
 //
 // class seqIset
 // (computes greedy independent set sequential coloring heuristic for 
-// ugraph types) 
+// ugraph type) 
 //
 ///////////////////////
 
 class seqIset : public  baseSeq<ugraph> {
-
-	using bitset = typename ugraph::_bbt;	//bitset type
-
 public:
+
+	using _bbt = typename ugraph::_bbt;	//bitset type
+
 	//construction / destruction
 	seqIset(const ugraph& ug) : baseSeq(ug),
 		bbSel_{ (int)ug_.size() },
@@ -115,7 +115,7 @@ public:
 	*		 in the graph @ug_. if @pBBsg is nullptr, computes a coloring for @ug_	* 
 	* @returns: number of colors used in the coloring
 	**/
-	int seq_coloring(const bitset* pBBsg = nullptr) {
+	int seq_coloring(const _bbt* pBBsg = nullptr) {
 
 		//sets the subgraph to be colored in bbUnsel_
 		if (pBBsg) { bbUnsel_ = *pBBsg; }
@@ -161,109 +161,106 @@ public:
 /////////
 //data members
 private:
-	bitset bbSel_;					//color iset under construction
-	bitset bbUnsel_;					//set of uncolored vertices
+	_bbt bbSel_;					//color iset under construction
+	_bbt bbUnsel_;					//set of uncolored vertices
 };
 
 
-///////////////////
+///////////////////////
 //
-// Greedy sequential coloring heuristic
-// TODO - refactor (17/05/2025)
+// class seq
+// (computes greedy sequential coloring heuristic for 
+// ugraph type) 
 //
-//////////////////
-							
-template<class BitSet_t>
-class SEQ {
+///////////////////////
 
-	std::vector<BitSet_t> bbc_;						//list of color (bit)sets.
-	std::vector<int> lc_;							//[vertex_index] -> color number --- standard color encoding 
-
-	int nV_;										//number of vertices	
-	int maxCol_;									//maximum number of colors
-	int nCol_ = 0;									//number of colors of the current coloring
+class seq : public  baseSeq<ugraph> {
 public:
+	using _bbt = typename ugraph::_bbt;						//bitset type
+
 	//construction / destruction
-	SEQ(int size, int MAX_COL = size) :
-		nV_{ size },
-		maxCol_{ MAX_COL },
-		lc_( (int)size, 0 ),
-		bbc_(MAX_COL, BitSet_t{ size })				//internally, color numbers range from [0 , maxCol_)
-	{}
-
-	//copy and move constructors forbidden
-	SEQ(const SEQ&) = delete;
-	SEQ(SEQ&&) = delete;
-	~SEQ() = default;
-
-	//setters and getters
-	std::size_t number_of_colors() const { return nCol_; }
-	std::size_t number_of_vertices() const { return nV_; }
-	std::size_t maximum_number_of_colors() const { return maxCol_; }
-
-	unsigned int color(int v) { return lc_[v]; }
-
-	//TODO...
+	seq(const ugraph& ug, int MAX_COL) : baseSeq(ug),
+		bbc_(MAX_COL + 1, _bbt{ (int)ug.size() })			// color number index starts at 1 			
+	{
+		assert(MAX_COL > 0);								//assert number of colors is positive
+		assert(MAX_COL <= ug.size());						//assert number of colors is less than number of vertices
+	}
 
 	///////////////
 	//drivers
+
 	/**
-	* @brief computes greedy sequential coloring for the graph @ug
-	* @param ug: input graph
+	* @brief computes greedy sequential coloring for the induced subgraph
+	*		 in @ug_ by @psg
 	* @returns : number of colors required
+	* @details: the coloring is provided in @lc_ (base class)
 	**/
-	int seq_coloring(const ugraph& ug) {
+	int seq_coloring(const std::vector<int>* psg = nullptr) {
 
-		int pc = ug.size();
-
-		///////////////////
-		assert(pc >= 1);
-		///////////////////
-		
-		//set list of all vertices
-		std::vector<int> uncol;
-		uncol.resize(pc);									//set of uncolored vertices
-		std::iota(uncol.begin(), uncol.end(), 0);			//set of vertices
-		
-		//I/O
-		//com::stl::print_collection(uncol);
+		int pc;
+		(psg != nullptr) ? pc = psg->size() : pc = this->ug_.size();
 			
 
+		//set list of all vertices
+		std::vector<int> uncol;
+		if (psg == nullptr) {
+			uncol.resize(pc);
+			std::iota(uncol.begin(), uncol.end(), 0);			//all of vertices in ug_
+		}
+		else {
+			uncol = *psg;
+		}
+
+		//I/O
+		//com::stl::print_collection(uncol);
+
+
 		//TODO...
-		int nC = 1;
-		bool color_found;
+		this->nCol_ = 1;
+		bool open_color = false;
 		for (const auto& v : uncol) {
 
 			//find first open bit color set with no vertices adjacent to v
-			color_found = false;
-			for (auto c = 1; c <= nC; ++c) {
-				int w = find_first_common_block(0, WDIV(v), ug.neighbors(v), bbc_[c]);
+			open_color = true;
+			for (auto c = 1; c <= nCol_; ++c) {
+				int w = find_first_common_block(0, WDIV(v), this->ug_.neighbors(v), bbc_[c]);
+				
+				//if no adjacent vertex is found in color c, add vertex v to color c
 				if (w == bbo::noBit) {
 
-					//enlarge color set, set color number
-					bbc_[c].set_bit(v);						
-					lc_[v] = c;	
-
-					bbc_[c].print();
+					//add vertex to color c
+					lc_[v] = c;
+					bbc_[c].set_bit(v);
 					
-					color_found = true;
+										
+					//set
+					open_color = false;
 					break;
 				}
 			}
 
-			//open a new color
-			if (!color_found) {
-				++nC;
+			//open a new color if no iset is available for v
+			if (open_color) {
+				++this->nCol_;
+
+				//cleans the open bitset color - necessary for seq_coloring to work for different runs
+				bbc_[this->nCol_].erase_bit();
 
 				//add vertex to color set
-				bbc_[nC].set_bit(v);
+				lc_[v] = this->nCol_;
+				bbc_[this->nCol_].set_bit(v);
 			}
 		}
 
-		return nC;
+		return this->nCol_;
 	}
-	
+
+
+private:
+	std::vector<_bbt> bbc_;						//list of color (bit)sets.
+
 };
+
 
 int main() {
 	const int SIZE = 5;
@@ -275,42 +272,28 @@ int main() {
 	ug.add_edge(1, 3);
 
 	//A)
-	//SEQ<bitarray> sq{ 5, 3 };
-	//int nCol = sq.seq_coloring(ug);
+
+	std::vector<int> sg = { 1, 2, 4 };
+
+	seq sq{ug, (int)ug.size()};
+	int nCol = sq.seq_coloring(&sg);
+	assert(sq.color(1) == 1);
+	assert(sq.color(2) == 2);
+	assert(sq.color(4) == 1); 
+
+	cout << "number of colors: " << nCol << endl;
 
 
 	//B)
-	//seqIset<bitarray> sqI(SIZE);
-	//int nCol = sqI.seq_coloring(ug);
-
-	//cout << "number of colors: " << nCol << endl;	
-	//assert(sqI.color(0) == 1);
-	//assert(sqI.color(1) == 2);
-	//assert(sqI.color(2) == 1);
-	//assert(sqI.color(3) == 3);
-
-	//C)
 	typename ugraph::_bbt bbsg{ SIZE, {1, 2, 4} };
 
-	bbsg.print();
-
 	seqIset sqI(ug);
-	int nCol = sqI.seq_coloring(&bbsg);
+	nCol = sqI.seq_coloring(&bbsg);
 
 	cout << "number of colors: " << nCol << endl;
 	assert(sqI.color(1) == 1);
 	assert(sqI.color(2) == 2);
 	assert(sqI.color(4) == 1);
-
-
-
-	/*std::vector<bitarray> kk{ 2 };
-	kk[0].reset(10);*/
-	
-
-
-
-	
 
 
 }
