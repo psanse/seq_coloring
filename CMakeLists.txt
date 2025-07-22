@@ -18,7 +18,7 @@ include(FetchContent)
 FetchContent_Declare(
   bitgraph
   GIT_REPOSITORY https://github.com/psanse/BitGraph
-  GIT_TAG v1.1.0 				# latest release
+  GIT_TAG v1.1.1 				# latest release
 )
 FetchContent_MakeAvailable(bitgraph)
 
