@@ -21,7 +21,7 @@
 //
 ///////////////////////
 
-template<class Grapht_t = ugraph>
+template<class Grapht_t = bitgraph::ugraph>
 class baseSeq {
 public:
 	
@@ -30,7 +30,7 @@ public:
 
 protected:
 	//construction / destruction
-	baseSeq(const ugraph& ug):
+	baseSeq(const bitgraph::ugraph& ug):
 		ug_{ ug },
 		lc_(ug_.size(), 0)
 	{
@@ -41,7 +41,7 @@ public:
 	//setters and getters
 	int number_of_colors()	const { return nCol_; }
 	int color(int v)		const { return lc_[v]; }	
-	const ugraph& graph()	const { return ug_; }
+	const bitgraph::ugraph& graph()	const { return ug_; }
 
 protected:
 	const Grapht_t& ug_;				//input graph
@@ -63,15 +63,15 @@ protected:
 //
 ///////////////////////
 
-class seqIset : public  baseSeq<ugraph> {
+class seqIset : public  baseSeq<bitgraph::ugraph> {
 public:
 
-	using _bbt = typename ugraph::_bbt;				//bitset type
+	using _bbt = typename bitgraph::ugraph::_bbt;				//bitset type
 
 	//construction / destruction
-	seqIset(const ugraph& ug) : baseSeq(ug),
-		bbSel_{ (int)ug_.size() },
-		bbUnsel_{ (int)ug_.size() , true }
+	seqIset(const bitgraph::ugraph& ug) : baseSeq(ug),
+		bbSel_{ ug_.size() },
+		bbUnsel_{ ug_.size() , true }
 	{}
 	
 	/**
@@ -87,15 +87,15 @@ public:
 
 		this->nCol_ = 1;
 		int pc = bbUnsel_.size();
-		int v = bbo::noBit;
+		int v = bitgraph::bbo::noBit;
 		while (true) {
 
 			//set bb_sel to the remaining vertices to be colored
 			this->bbSel_ = this->bbUnsel_;
 
 			//build a new iset with vertices from bb_sel
-			this->bbSel_.init_scan(bbo::NON_DESTRUCTIVE);
-			while ((v = this->bbSel_.next_bit()) != bbo::noBit) {
+			this->bbSel_.init_scan(bitgraph::bbo::NON_DESTRUCTIVE);
+			while ((v = this->bbSel_.next_bit()) != bitgraph::bbo::noBit) {
 
 				//update coloring
 				this->lc_[v] = this->nCol_;
@@ -141,14 +141,14 @@ private:
 //
 ///////////////////////
 
-class seq : public  baseSeq<ugraph> {
+class seq : public  baseSeq<bitgraph::ugraph> {
 public:
 
-	using _bbt = typename ugraph::_bbt;						//bitset type
+	using _bbt = typename bitgraph::ugraph::_bbt;						//bitset type
 
 	//construction / destruction
-	seq(const ugraph& ug, int MAX_COL) : baseSeq(ug),
-		bbc_(MAX_COL + 1, _bbt{ (int)ug.size() })			// color number index starts at 1 			
+	seq(const bitgraph::ugraph& ug, int MAX_COL) : baseSeq(ug),
+		bbc_(MAX_COL + 1, _bbt{ ug.size() })			// color number index starts at 1 			
 	{
 		assert(MAX_COL > 0);								//assert number of colors is positive
 		assert(MAX_COL <= ug.size());						//assert number of colors is less than number of vertices
@@ -189,7 +189,7 @@ public:
 				int w = find_first_common_block(0, WDIV(v), this->ug_.neighbors(v), bbc_[c]);
 				
 				//if no adjacent vertex is found in color c, add vertex v to color c
-				if (w == bbo::noBit) {
+				if (w == bitgraph::bbo::noBit) {
 
 					//add vertex to color c
 					lc_[v] = c;

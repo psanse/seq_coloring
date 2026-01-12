@@ -17,7 +17,7 @@ using namespace std;
 int main() {
 	const int SIZE = 5;
 
-	ugraph ug{ SIZE };
+	bitgraph::ugraph ug{ SIZE };
 	ug.add_edge(0, 1);
 	ug.add_edge(1, 2);
 	ug.add_edge(2, 3);
@@ -36,7 +36,7 @@ int main() {
 
 
 	//B) greedy iset seq
-	typename ugraph::_bbt bbsg{ SIZE, {1, 2, 4} };
+	typename bitgraph::ugraph::_bbt bbsg{ SIZE, {1, 2, 4} };
 
 	seqIset sqI(ug);
 	nCol = sqI.seq_coloring(&bbsg);
