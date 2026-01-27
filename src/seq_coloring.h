@@ -86,7 +86,7 @@ public:
 		else { bbUnsel_.set_bit(0, ug_.size() - 1); }	//all vertices are colored
 
 		this->nCol_ = 1;
-		int pc = bbUnsel_.size();
+		int pc = bbUnsel_.count();
 		int v = bitgraph::bbo::noBit;
 		while (true) {
 
