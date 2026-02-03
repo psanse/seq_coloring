@@ -21,12 +21,12 @@
 //
 ///////////////////////
 
-template<class Grapht_t = bitgraph::ugraph>
+template<class GraphT = bitgraph::ugraph>
 class baseSeq {
 public:
 	
-	using _gt = Grapht_t;						//graph type
-	using _bbt = typename _gt::_bbt;			//bitset type
+	using graph_type = GraphT;									// graph type
+	using bitset_type = typename graph_type::bitset_type;			// bitset type
 
 protected:
 	//construction / destruction
@@ -44,7 +44,7 @@ public:
 	const bitgraph::ugraph& graph()	const { return ug_; }
 
 protected:
-	const Grapht_t& ug_;				//input graph
+	const GraphT& ug_;				//input graph
 	std::vector<int> lc_;				//[vertex_index] -> color number --- standard color encoding 
 	int nCol_ = 0;						//number of colors of the current coloring
 };
@@ -66,7 +66,7 @@ protected:
 class seqIset : public  baseSeq<bitgraph::ugraph> {
 public:
 
-	using _bbt = typename bitgraph::ugraph::_bbt;				//bitset type
+	using bitset_type = typename bitgraph::ugraph::bitset_type;				//bitset type
 
 	//construction / destruction
 	seqIset(const bitgraph::ugraph& ug) : baseSeq(ug),
@@ -79,7 +79,7 @@ public:
 	*		 in the graph @ug_. If @pBBsg is nullptr, computes a coloring for the full graph @ug_. 
 	* @returns: number of colors used in the coloring
 	**/
-	int seq_coloring(const _bbt* pBBsg = nullptr) {
+	int seq_coloring(const bitset_type* pBBsg = nullptr) {
 
 		//sets the subgraph to be colored in bbUnsel_
 		if (pBBsg) { bbUnsel_ = *pBBsg; }
@@ -124,8 +124,8 @@ public:
 /////////
 //data members
 private:
-	_bbt bbSel_;					//color iset under construction - selected vertices that can potentially enlarge the current iset
-	_bbt bbUnsel_;					//set of uncolored vertices
+	bitset_type bbSel_;					//color iset under construction - selected vertices that can potentially enlarge the current iset
+	bitset_type bbUnsel_;					//set of uncolored vertices
 };
 
 ///////////////////////
@@ -144,11 +144,11 @@ private:
 class seq : public  baseSeq<bitgraph::ugraph> {
 public:
 
-	using _bbt = typename bitgraph::ugraph::_bbt;						//bitset type
+	using bitset_type = typename bitgraph::ugraph::bitset_type;
 
 	//construction / destruction
 	seq(const bitgraph::ugraph& ug, int MAX_COL) : baseSeq(ug),
-		bbc_(MAX_COL + 1, _bbt{ ug.size() })			// color number index starts at 1 			
+		bbc_(MAX_COL + 1, bitset_type{ ug.size() })			// color number index starts at 1 			
 	{
 		assert(MAX_COL > 0);								//assert number of colors is positive
 		assert(MAX_COL <= ug.size());						//assert number of colors is less than number of vertices
@@ -221,7 +221,7 @@ public:
 /////////
 //data members
 private:
-	std::vector<_bbt> bbc_;						//list of color (bit) sets.
+	std::vector<bitset_type> bbc_;						//list of color (bit) sets.
 
 };
 

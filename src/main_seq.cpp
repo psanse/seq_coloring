@@ -36,7 +36,7 @@ int main() {
 
 
 	//B) greedy iset seq
-	typename bitgraph::ugraph::_bbt bbsg{ SIZE, {1, 2, 4} };
+	typename bitgraph::ugraph::bitset_type bbsg{ SIZE, {1, 2, 4} };
 
 	seqIset sqI(ug);
 	nCol = sqI.seq_coloring(&bbsg);

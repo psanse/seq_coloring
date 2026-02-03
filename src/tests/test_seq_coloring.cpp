@@ -34,7 +34,7 @@ TEST_F(SeqColorTest, seqIset) {
 
 	////////////////////////////
 	//color a subset of vertices
-	typename ugraph::_bbt bbsg{ static_cast<size_t>(NV), {1, 2, 4} };
+	typename ugraph::bitset_type bbsg{ static_cast<size_t>(NV), {1, 2, 4} };
 
 	seqIset sqI(ug);
 	int nCol = sqI.seq_coloring(&bbsg);
