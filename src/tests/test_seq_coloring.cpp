@@ -36,51 +36,53 @@ TEST_F(SeqColorTest, seqIset) {
 	//color a subset of vertices
 	typename ugraph::bitset_type bbsg{ static_cast<size_t>(NV), {1, 2, 4} };
 
-	seqIset sqI(ug);
-	int nCol = sqI.seq_coloring(&bbsg);
+	GreedyIsetSequentialColoring iset_seq_col(ug);
+	int nCol = iset_seq_col.run(&bbsg);
 	
-	EXPECT_EQ(sqI.number_of_colors(), 2);
-	EXPECT_EQ(sqI.color(1), 1);
-	EXPECT_EQ(sqI.color(2), 2);
-	EXPECT_EQ(sqI.color(4), 1);
+	EXPECT_EQ(iset_seq_col.num_colors(), 2);
+	EXPECT_EQ(iset_seq_col.color(1), 1);
+	EXPECT_EQ(iset_seq_col.color(2), 2);
+	EXPECT_EQ(iset_seq_col.color(4), 1);
 
 	////////////////////////////
 	//color the full graph
-	nCol = sqI.seq_coloring();
+	nCol = iset_seq_col.run();
 
-	EXPECT_EQ(sqI.number_of_colors(), 3);
-	EXPECT_EQ(sqI.color(0), 1);
-	EXPECT_EQ(sqI.color(1), 2);
-	EXPECT_EQ(sqI.color(2), 1);
-	EXPECT_EQ(sqI.color(3), 3);
-	EXPECT_EQ(sqI.color(4), 1);
+	EXPECT_EQ(iset_seq_col.num_colors(), 3);
+	EXPECT_EQ(iset_seq_col.color(0), 1);
+	EXPECT_EQ(iset_seq_col.color(1), 2);
+	EXPECT_EQ(iset_seq_col.color(2), 1);
+	EXPECT_EQ(iset_seq_col.color(3), 3);
+	EXPECT_EQ(iset_seq_col.color(4), 1);
 
 }
 
 TEST_F(SeqColorTest, seq) {
 
+	using VertexList = std::vector<int>;
+
 	////////////////////////////
 	//color a subset of vertices
-	std::vector<int> sg = { 1, 2, 4 };
+	VertexList subgraph = { 1, 2, 4 };
 
-	seq sq(ug, sg.size());
-	int nCol = sq.seq_coloring(&sg);
+	GreedySequentialColoring seq_col(ug, subgraph.size());
+	int nCol = seq_col.run(&subgraph);
 
-	EXPECT_EQ(sq.number_of_colors(), 2);
-	EXPECT_EQ(sq.color(1), 1);
-	EXPECT_EQ(sq.color(2), 2);
-	EXPECT_EQ(sq.color(4), 1);
+	EXPECT_EQ(seq_col.num_colors(), 2);
+	EXPECT_EQ(seq_col.color(1), 1);
+	EXPECT_EQ(seq_col.color(2), 2);
+	EXPECT_EQ(seq_col.color(4), 1);
 
 	////////////////////////////
 	//color the full graph
-	nCol = sq.seq_coloring();
+	nCol = seq_col.run();
 
-	EXPECT_EQ(sq.number_of_colors(), 3);
-	EXPECT_EQ(sq.color(0), 1);
-	EXPECT_EQ(sq.color(1), 2);
-	EXPECT_EQ(sq.color(2), 1);
-	EXPECT_EQ(sq.color(3), 3);
-	EXPECT_EQ(sq.color(4), 1);
+	EXPECT_EQ(seq_col.num_colors(), 3);
+	EXPECT_EQ(seq_col.color(0), 1);
+	EXPECT_EQ(seq_col.color(1), 2);
+	EXPECT_EQ(seq_col.color(2), 1);
+	EXPECT_EQ(seq_col.color(3), 3);
+	EXPECT_EQ(seq_col.color(4), 1);
 
 }
 

@@ -2,7 +2,8 @@
 * @file main_seq.cpp
 * @brief unit tests for sequential coloring heuristics
 * @author: pss
-* @details created 27/03/2025, last update 18/05/2025
+* @date 27/03/2025
+* @last modified 05/02/2026
 **/
 
 using namespace std;
@@ -10,11 +11,12 @@ using namespace std;
 #include <iostream>
 #include "seq_coloring.h"
 
-
 /////////////////
 // executable - see also unit tests
 
 int main() {
+	using VertexList = std::vector<int>;
+
 	const int SIZE = 5;
 
 	bitgraph::ugraph ug{ SIZE };
@@ -23,28 +25,28 @@ int main() {
 	ug.add_edge(2, 3);
 	ug.add_edge(1, 3);
 
-	//A) greedy seq
-	std::vector<int> sg = { 1, 2, 4 };
+	//A) GreedySequentialColoring
+	VertexList subgraph = { 1, 2, 4 };
 
-	seq sq{ug, (int)ug.size()};
-	int nCol = sq.seq_coloring(&sg);
-	assert(sq.color(1) == 1);
-	assert(sq.color(2) == 2);
-	assert(sq.color(4) == 1); 
+	GreedySequentialColoring seq_col{ug, ug.num_vertices()};
+	int nCol = seq_col.run(&subgraph);
+	assert(seq_col.color(1) == 1);
+	assert(seq_col.color(2) == 2);
+	assert(seq_col.color(4) == 1); 
 
 	cout << "number of colors: " << nCol << endl;
 
 
-	//B) greedy iset seq
+	//B) greedy iset GreedySequentialColoring
 	typename bitgraph::ugraph::bitset_type bbsg{ SIZE, {1, 2, 4} };
 
-	seqIset sqI(ug);
-	nCol = sqI.seq_coloring(&bbsg);
+	GreedyIsetSequentialColoring iset_seq_col(ug);
+	nCol = iset_seq_col.run(&bbsg);
 
 	cout << "number of colors: " << nCol << endl;
-	assert(sqI.color(1) == 1);
-	assert(sqI.color(2) == 2);
-	assert(sqI.color(4) == 1);
+	assert(iset_seq_col.color(1) == 1);
+	assert(iset_seq_col.color(2) == 2);
+	assert(iset_seq_col.color(4) == 1);
 
 
 }
