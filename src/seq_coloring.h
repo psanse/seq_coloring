@@ -66,7 +66,10 @@ protected:
 class seqIset : public  baseSeq<bitgraph::ugraph> {
 public:
 
-	using bitset_type = typename bitgraph::ugraph::bitset_type;				//bitset type
+	using bitset_type = typename bitgraph::ugraph::bitset_type;				// bitset type
+	using Iset = bitset_type;												// alias for semantic type
+	using VertexBitset = bitset_type;										// alias for semantic type
+	
 
 	//construction / destruction
 	seqIset(const bitgraph::ugraph& ug) : baseSeq(ug),
@@ -124,8 +127,8 @@ public:
 /////////
 //data members
 private:
-	bitset_type bbSel_;					//color iset under construction - selected vertices that can potentially enlarge the current iset
-	bitset_type bbUnsel_;					//set of uncolored vertices
+	Iset bbSel_;						// color iset under construction - selected vertices that can potentially enlarge the current iset
+	VertexBitset bbUnsel_;				// set of uncolored vertices
 };
 
 ///////////////////////
@@ -145,10 +148,11 @@ class seq : public  baseSeq<bitgraph::ugraph> {
 public:
 
 	using bitset_type = typename bitgraph::ugraph::bitset_type;
+	using IsetPartition = std::vector<bitset_type>;				
 
 	//construction / destruction
 	seq(const bitgraph::ugraph& ug, int MAX_COL) : baseSeq(ug),
-		bbc_(MAX_COL + 1, bitset_type{ ug.size() })			// color number index starts at 1 			
+		iset_partition_(MAX_COL + 1, bitset_type{ ug.size() })			// color number index starts at 1 			
 	{
 		assert(MAX_COL > 0);								//assert number of colors is positive
 		assert(MAX_COL <= ug.size());						//assert number of colors is less than number of vertices
@@ -179,21 +183,21 @@ public:
 		//main loop
 		this->nCol_ = 1;
 		bool open_color = false;
-		bbc_[this->nCol_].erase_bit();							//cleans the first bitset color (must be open)
+		iset_partition_[this->nCol_].erase_bit();							//cleans the first bitset color (must be open)
 		for (const auto& v : uncol) {
 
 			//find first open bit color set with no vertices adjacent to v
 			open_color = true;
 			for (auto c = 1; c <= nCol_; ++c) {
 
-				int w = find_first_common_block(0, WDIV(v), this->ug_.neighbors(v), bbc_[c]);
+				int w = find_first_common_block(0, WDIV(v), this->ug_.neighbors(v), iset_partition_[c]);
 				
 				//if no adjacent vertex is found in color c, add vertex v to color c
 				if (w == bitgraph::bbo::noBit) {
 
 					//add vertex to color c
 					lc_[v] = c;
-					bbc_[c].set_bit(v);
+					iset_partition_[c].set_bit(v);
 					
 										
 					//set flag - do not open a new color
@@ -207,11 +211,11 @@ public:
 				++this->nCol_;
 
 				//cleans the open bitset color - necessary for seq_coloring to work for different runs
-				bbc_[this->nCol_].erase_bit();
+				iset_partition_[this->nCol_].erase_bit();
 
 				//add vertex to color set
 				lc_[v] = this->nCol_;
-				bbc_[this->nCol_].set_bit(v);
+				iset_partition_[this->nCol_].set_bit(v);
 			}
 		}
 
@@ -221,7 +225,7 @@ public:
 /////////
 //data members
 private:
-	std::vector<bitset_type> bbc_;						//list of color (bit) sets.
+	IsetPartition iset_partition_;						//list of color (bit) sets.
 
 };
 
