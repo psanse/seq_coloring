@@ -1,18 +1,19 @@
 /**
-* @file main_seq.cpp
-* @brief unit tests for sequential coloring heuristics
-* @author: pss
-* @date 27/03/2025
-* @last modified 05/02/2026
-**/
-
-using namespace std;
+ * @file main_seq.cpp
+ * @brief Main executable for sequential vertex coloring heuristics.
+ *
+ * @details Provides the entry point for running and evaluating
+ * sequential coloring algorithms.
+ *
+ * @author pss
+ * @date 2025-03-27
+ * @since 2025-03-27
+ * @version 2026-02-05
+ */
 
 #include <iostream>
 #include "seq_coloring.h"
 
-/////////////////
-// executable - see also unit tests
 
 int main() {
 	using VertexList = std::vector<int>;
@@ -34,7 +35,7 @@ int main() {
 	assert(seq_col.color(2) == 2);
 	assert(seq_col.color(4) == 1); 
 
-	cout << "number of colors: " << nCol << endl;
+	std::cout << "number of colors: " << nCol << std::endl;
 
 
 	//B) greedy iset GreedySequentialColoring
@@ -43,7 +44,7 @@ int main() {
 	GreedyIsetSequentialColoring iset_seq_col(ug);
 	nCol = iset_seq_col.run(&bbsg);
 
-	cout << "number of colors: " << nCol << endl;
+	std::cout << "number of colors: " << nCol << std::endl;
 	assert(iset_seq_col.color(1) == 1);
 	assert(iset_seq_col.color(2) == 2);
 	assert(iset_seq_col.color(4) == 1);

@@ -1,25 +1,46 @@
-###################
-# unit tests with googletest framwork
 
-add_executable (tests_sequential_coloring 
-     
-    test_seq_coloring.cpp
-    
+#######################
+# Sequential coloring unit tests
+#######################
+
+add_executable (tests_sequential_coloring      
+    test_seq_coloring.cpp    
 )
 
+# Link dependencies
+target_link_libraries(tests_sequential_coloring
+    PRIVATE
+        graph
+        bitscan
+        utils
+        GTest::gtest_main
+)
+
+
+# Include directories
+target_include_directories(tests_sequential_coloring
+    PRIVATE
+        ${CMAKE_SOURCE_DIR}/src
+        ${bitgraph_SOURCE_DIR}/src
+)
+
+# Require C++14
+target_compile_features(tests_sequential_coloring
+    PRIVATE cxx_std_14
+)
+
+# Output directory
 set_target_properties(tests_sequential_coloring 
     PROPERTIES
-    #ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
-    #LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
-    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/bin/tests"
-)
-
-target_include_directories(tests_sequential_coloring PUBLIC
-	$<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/src>
+        RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin/tests"
 )
 
 
-target_link_libraries (tests_sequential_coloring LINK_PUBLIC  graph bitscan gtest_main utils)
+# Register GoogleTest tests with CTest
+include(GoogleTest)
+gtest_discover_tests(tests_sequential_coloring)
+
+
 
 
 

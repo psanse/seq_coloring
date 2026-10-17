@@ -16,8 +16,7 @@
 
 ///////////////////////
 //
-// Base class for greedy sequential coloring heuristic
-// (cannot create an instance)
+// Base Abstract class for greedy sequential coloring heuristic
 //
 ///////////////////////
 
