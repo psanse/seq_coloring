@@ -65,7 +65,7 @@ TEST_F(SeqColorTest, seq) {
 	//color a subset of vertices
 	VertexList subgraph = { 1, 2, 4 };
 
-	GreedySequentialColoring seq_col(ug, subgraph.size());
+	GreedySequentialColoring seq_col(ug, static_cast<int>(subgraph.size()));
 	int nCol = seq_col.run(&subgraph);
 
 	EXPECT_EQ(seq_col.num_colors(), 2);

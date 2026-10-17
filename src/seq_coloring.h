@@ -10,7 +10,6 @@
 #include <numeric>				
 #include "graph/graph.h"
 #include "bitscan/bitscan.h"
-#include "utils/common.h"
 
 #include <cassert>
 
@@ -91,7 +90,7 @@ public:
 
 		//sets the subgraph to be colored in bbUncolored_
 		if (pBBsg) { bbUncolored_ = *pBBsg; }
-		else { bbUncolored_.set_bit(0, ugraph_.size() - 1); }	//all vertices are colored
+		else { bbUncolored_.set_bit(0, static_cast<int>(ugraph_.size()) - 1); }	//all vertices are colored
 
 		this->num_col_ = 1;
 		int pc = bbUncolored_.count();
@@ -174,7 +173,7 @@ public:
 	int run(const std::vector<int>* psg = nullptr) {
 
 		int pc;
-		(psg != nullptr) ? pc = psg->size() : pc = this->ugraph_.size();
+		pc = static_cast<int>(psg ? psg->size() : this->ugraph_.size());
 		
 		//set list of all vertices
 		std::vector<int> uncol;
