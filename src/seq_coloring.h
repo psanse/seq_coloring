@@ -49,7 +49,7 @@ protected:
 	 * @param ug graph to be colored; stored by reference, must outlive this object
 	 * @pre ug.size() > 0
 	 */
-	explicit BaseSequentialColoring(const bitgraph::ugraph& ug):
+	explicit BaseSequentialColoring(const graph_type& ug):
 		ugraph_{ ug },
 		vertex_coloring_(ugraph_.size(), 0)
 	{
@@ -68,7 +68,7 @@ public:
 	int color(Vertex v) const { return vertex_coloring_[v]; }
 
 	/** @brief Graph being colored. */
-	const bitgraph::ugraph& graph()	const { return ugraph_; }
+	const graph_type& graph()	const { return ugraph_; }
 
 protected:
 	const graph_type& ugraph_;					///< reference graph
@@ -105,50 +105,50 @@ public:
 	 * @pre ug.size() > 0
 	 */
 	explicit GreedyIsetSequentialColoring(const bitgraph::ugraph& ug) : BaseSequentialColoring(ug),
-		bbIset_{ ugraph_.size() },
-		bbUncolored_{ ugraph_.size() , true }
+		iset_{ ugraph_.size() },
+		uncolored_{ ugraph_.size() , true }
 	{}
 
 	/**
 	 * @brief Computes a greedy independent-set sequential coloring.
 	 *
-	 * @details Colors the subgraph induced by the vertices in @p pBBsg, or the
-	 * whole graph if @p pBBsg is nullptr. The result is available through
+	 * @details Colors the subgraph induced by the vertices in @p p_bbsg, or the
+	 * whole graph if @p p_bbsg is nullptr. The result is available through
 	 * color() and num_colors().
 	 *
-	 * @param pBBsg bitset of the vertices inducing the subgraph to color;
+	 * @param p_bbsg bitset of the vertices inducing the subgraph to color;
 	 *              nullptr (default) colors the full graph
 	 * @returns number of colors used
 	 */
-	int run(const bitset_type* pBBsg = nullptr) {
+	int run(const bitset_type* p_bbsg = nullptr) {
 
-		//sets the subgraph to be colored in bbUncolored_
-		if (pBBsg) { bbUncolored_ = *pBBsg; }
-		else { bbUncolored_.set_bit(0, static_cast<int>(ugraph_.size()) - 1); }	//all vertices are colored
+		//sets the subgraph to be colored in uncolored_
+		if (p_bbsg) { uncolored_ = *p_bbsg; }
+		else { uncolored_.set_bit(0, static_cast<int>(ugraph_.size()) - 1); }	//all vertices are colored
 
 		this->num_col_ = 1;
-		int pc = bbUncolored_.count();
+		int num_uncolored = uncolored_.count();
 		int v = bitgraph::bbo::noBit;
 		while (true) {
 
-			//set bb_sel to the remaining vertices to be colored
-			this->bbIset_ = this->bbUncolored_;
+			//candidates for the new iset: all remaining uncolored vertices
+			this->iset_ = this->uncolored_;
 
-			//build a new iset with vertices from bb_sel
-			this->bbIset_.init_scan(bitgraph::bbo::NON_DESTRUCTIVE);
-			while ((v = this->bbIset_.next_bit()) != bitgraph::bbo::noBit) {
+			//build a new iset with vertices from uncolored_
+			this->iset_.init_scan(bitgraph::bbo::NON_DESTRUCTIVE);
+			while ((v = this->iset_.next_bit()) != bitgraph::bbo::noBit) {
 
 				//update coloring
 				this->vertex_coloring_[v] = this->num_col_;
 
 				//early exit - all vertices colored
-				if ((--pc) == 0) { return this->num_col_; }
+				if ((--num_uncolored) == 0) { return this->num_col_; }
 
 				//removes neighbors of v from the color set under construction
-				this->bbIset_.erase_block(WDIV(v), -1, ugraph_.neighbors(v));
+				this->iset_.erase_block(WDIV(v), -1, ugraph_.neighbors(v));
 
 				//remove colored vertex from uncolored set
-				this->bbUncolored_.erase_bit(v);
+				this->uncolored_.erase_bit(v);
 			}
 
 			//open a new color
@@ -157,8 +157,8 @@ public:
 	}
 
 private:
-	Iset bbIset_;							///< color iset under construction - candidate vertices that can still enlarge the current iset
-	VertexBitset bbUncolored_;				///< set of uncolored vertices
+	Iset iset_;							///< color iset under construction - candidate vertices that can still enlarge the current iset
+	VertexBitset uncolored_;				///< set of uncolored vertices
 };
 
 /**
@@ -186,42 +186,42 @@ public:
 	/**
 	 * @brief Constructs the heuristic for a graph.
 	 * @param ug graph to be colored; stored by reference, must outlive this object
-	 * @param MAX_COL upper bound on the number of colors that will be needed
+	 * @param max_col upper bound on the number of colors that will be needed
 	 *                (e.g. the number of vertices to be colored)
-	 * @pre 0 < MAX_COL <= ug.size()
+	 * @pre 0 < max_col <= ug.size()
 	 */
-	GreedySequentialColoring(const bitgraph::ugraph& ug, int MAX_COL) : BaseSequentialColoring(ug),
-		iset_partition_(MAX_COL + 1, bitset_type{ ug.size() })			// color number index starts at 1
+	GreedySequentialColoring(const bitgraph::ugraph& ug, int max_col) : BaseSequentialColoring(ug),
+		iset_partition_(max_col + 1, bitset_type{ ug.size() })			// color number index starts at 1
 	{
-		assert(MAX_COL > 0);								//assert number of colors is positive
-		assert(MAX_COL <= ug.size());						//assert number of colors is less than number of vertices
+		assert(max_col > 0);								//assert number of colors is positive
+		assert(max_col <= ug.size());						//assert number of colors is less than number of vertices
 	}
 
 	/**
 	 * @brief Computes a greedy sequential coloring.
 	 *
-	 * @details Colors the subgraph induced by the vertices in @p psg, taken in
-	 * list order, or the whole graph if @p psg is nullptr. The result is
+	 * @details Colors the subgraph induced by the vertices in @p p_sg, taken in
+	 * list order, or the whole graph if @p p_sg is nullptr. The result is
 	 * available through color() and num_colors(). Does not clear a previous
 	 * coloring between runs.
 	 *
-	 * @param psg list of vertices inducing the subgraph to color;
+	 * @param p_sg list of vertices inducing the subgraph to color;
 	 *            nullptr (default) colors the full graph
 	 * @returns number of colors used
-	 * @pre the number of colors needed does not exceed the MAX_COL given at construction
+	 * @pre the number of colors needed does not exceed the max_col given at construction
 	 */
-	int run(const std::vector<int>* psg = nullptr) {
+	int run(const std::vector<int>* p_sg = nullptr) {
 
-		const int pc = static_cast<int>(psg ? psg->size() : this->ugraph_.size());
+		const int num_uncolored = static_cast<int>(p_sg ? p_sg->size() : this->ugraph_.size());
 
 		//set list of all vertices
 		std::vector<int> uncol;
-		if (psg == nullptr) {
-			uncol.resize(pc);
+		if (p_sg == nullptr) {
+			uncol.resize(num_uncolored);
 			std::iota(uncol.begin(), uncol.end(), 0);			//all of vertices in ugraph_
 		}
 		else {
-			uncol = *psg;
+			uncol = *p_sg;
 		}
 
 		//main loop
