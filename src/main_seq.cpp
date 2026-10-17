@@ -15,6 +15,11 @@
 #include "seq_coloring.h"
 
 
+/**
+ * @brief Demo: colors a small graph with both sequential heuristics.
+ * @details Colors the subgraph induced by vertices {1, 2, 4} and prints the number of colors.
+ * @returns 0 on success
+ */
 int main() {
 	using VertexList = std::vector<int>;
 
@@ -41,7 +46,7 @@ int main() {
 	//B) greedy iset GreedySequentialColoring
 	typename bitgraph::ugraph::bitset_type bbsg{ SIZE, {1, 2, 4} };
 
-	GreedyIsetSequentialColoring iset_seq_col(ug);
+	GreedyIsetSequentialColoring iset_seq_col{ ug };
 	nCol = iset_seq_col.run(&bbsg);
 
 	std::cout << "number of colors: " << nCol << std::endl;

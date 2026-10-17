@@ -1,19 +1,25 @@
 /**
-* @file test_seq_coloring.cpp
-* @brief Unit tests for sequential coloring
-* @details created 18/05/2025
-* @dev pss
-**/
+ * @file test_seq_coloring.cpp
+ * @brief Unit tests for the sequential coloring heuristics in seq_coloring.h.
+ *
+ * @details Checks GreedyIsetSequentialColoring and GreedySequentialColoring on a
+ * small graph, both for a vertex subset and for the full graph.
+ *
+ * @author pss
+ * @date 2025-05-18
+ */
 
 #include "gtest/gtest.h"
 #include "seq_coloring.h"
 
 #include <iostream>
 
-using namespace std;
 using namespace bitgraph;
 
 
+/**
+ * @brief Test fixture: 5-vertex undirected graph with edges 0-1, 1-2, 2-3, 1-3 (vertex 4 isolated).
+ */
 class SeqColorTest : public ::testing::Test {
 protected:
 	void SetUp() override {
@@ -25,11 +31,12 @@ protected:
 	}
 	void TearDown() override {}
 
-	//directed graph instance	
+	//undirected graph instance	
 	const int NV = 5;
 	bitgraph::ugraph ug;
 };
 
+/** @brief GreedyIsetSequentialColoring on a vertex subset and on the full graph. */
 TEST_F(SeqColorTest, seqIset) {
 
 	////////////////////////////
@@ -57,6 +64,7 @@ TEST_F(SeqColorTest, seqIset) {
 
 }
 
+/** @brief GreedySequentialColoring on a vertex subset and on the full graph. */
 TEST_F(SeqColorTest, seq) {
 
 	using VertexList = std::vector<int>;
