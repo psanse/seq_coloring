@@ -34,16 +34,27 @@ ug.add_edge(1, 3);
 
 // SEQ: color the subgraph induced by vertices {1, 2, 4}
 std::vector<int> subgraph = { 1, 2, 4 };
-GreedySequentialColoring seq{ ug, static_cast<int>(subgraph.size()) };  // upper bound on #colors
-int n_colors = seq.run(&subgraph);        // 2
-int c = seq.color(2);                     // 2
+GreedySequentialColoring seq{ ug, static_cast<int>(subgraph.size()) };  // max #colors
+int n_colors = seq.compute_coloring(&subgraph);  // 2
+int c = seq.color(2);  // 2
 
 // ISEQ: color the full graph
 GreedyIsetSequentialColoring iseq{ ug };
-n_colors = iseq.run();                    // 3
+n_colors = iseq.compute_coloring();  // 3
 ```
 
 See [`src/main_seq.cpp`](src/main_seq.cpp) and [`src/tests/test_seq_coloring.cpp`](src/tests/test_seq_coloring.cpp) for complete examples.
+
+## API
+
+Both classes expose the same interface (`num_colors()`, `color()` and `graph()` come from the common base class `BaseSequentialColoring`):
+
+| Member | Description |
+|---|---|
+| `compute_coloring(subgraph = nullptr)` | Colors the subgraph induced by `subgraph` (a `std::vector<int>` for SEQ, a graph bitset for ISEQ), or the whole graph if `nullptr`. Returns the number of colors. |
+| `num_colors()` | Number of colors of the last coloring. |
+| `color(v)` | Color of vertex `v` (from 1) in the last coloring. |
+| `graph()` | The graph being colored. |
 
 ## Build
 

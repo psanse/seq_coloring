@@ -120,7 +120,7 @@ public:
 	 *              nullptr (default) colors the full graph
 	 * @returns number of colors used
 	 */
-	int run(const bitset_type* p_bbsg = nullptr) {
+	int compute_coloring(const bitset_type* p_bbsg = nullptr) {
 
 		//sets the subgraph to be colored in uncolored_
 		if (p_bbsg) { uncolored_ = *p_bbsg; }
@@ -210,7 +210,7 @@ public:
 	 * @returns number of colors used
 	 * @pre the number of colors needed does not exceed the max_col given at construction
 	 */
-	int run(const std::vector<int>* p_sg = nullptr) {
+	int compute_coloring(const std::vector<int>* p_sg = nullptr) {
 
 		const int num_uncolored = static_cast<int>(p_sg ? p_sg->size() : this->ugraph_.size());
 
@@ -254,7 +254,7 @@ public:
 			if (open_color) {
 				++this->num_col_;
 
-				//cleans the open bitset color - necessary for run to work for different runs
+				//cleans the open bitset color - necessary for compute_coloring() to work for different runs
 				iset_partition_[this->num_col_].erase_bit();
 
 				//add vertex to color set

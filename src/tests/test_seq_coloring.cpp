@@ -44,7 +44,7 @@ TEST_F(SeqColorTest, seqIset) {
 	typename ugraph::bitset_type bbsg{ static_cast<size_t>(NV), {1, 2, 4} };
 
 	GreedyIsetSequentialColoring iset_seq_col(ug);
-	int nCol = iset_seq_col.run(&bbsg);
+	int nCol = iset_seq_col.compute_coloring(&bbsg);
 	
 	EXPECT_EQ(iset_seq_col.num_colors(), 2);
 	EXPECT_EQ(iset_seq_col.color(1), 1);
@@ -53,7 +53,7 @@ TEST_F(SeqColorTest, seqIset) {
 
 	////////////////////////////
 	//color the full graph
-	nCol = iset_seq_col.run();
+	nCol = iset_seq_col.compute_coloring();
 
 	EXPECT_EQ(iset_seq_col.num_colors(), 3);
 	EXPECT_EQ(iset_seq_col.color(0), 1);
@@ -74,7 +74,7 @@ TEST_F(SeqColorTest, seq) {
 	VertexList subgraph = { 1, 2, 4 };
 
 	GreedySequentialColoring seq_col(ug, static_cast<int>(subgraph.size()));
-	int nCol = seq_col.run(&subgraph);
+	int nCol = seq_col.compute_coloring(&subgraph);
 
 	EXPECT_EQ(seq_col.num_colors(), 2);
 	EXPECT_EQ(seq_col.color(1), 1);
@@ -83,7 +83,7 @@ TEST_F(SeqColorTest, seq) {
 
 	////////////////////////////
 	//color the full graph
-	nCol = seq_col.run();
+	nCol = seq_col.compute_coloring();
 
 	EXPECT_EQ(seq_col.num_colors(), 3);
 	EXPECT_EQ(seq_col.color(0), 1);

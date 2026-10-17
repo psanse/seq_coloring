@@ -35,7 +35,7 @@ int main() {
 	VertexList subgraph = { 1, 2, 4 };
 
 	GreedySequentialColoring seq_col{ug, ug.num_vertices()};
-	int nCol = seq_col.run(&subgraph);
+	int nCol = seq_col.compute_coloring(&subgraph);
 	assert(seq_col.color(1) == 1);
 	assert(seq_col.color(2) == 2);
 	assert(seq_col.color(4) == 1); 
@@ -47,7 +47,7 @@ int main() {
 	typename bitgraph::ugraph::bitset_type bbsg{ SIZE, {1, 2, 4} };
 
 	GreedyIsetSequentialColoring iset_seq_col{ ug };
-	nCol = iset_seq_col.run(&bbsg);
+	nCol = iset_seq_col.compute_coloring(&bbsg);
 
 	std::cout << "number of colors: " << nCol << std::endl;
 	assert(iset_seq_col.color(1) == 1);
