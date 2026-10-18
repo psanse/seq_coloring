@@ -10,6 +10,8 @@
 
 # Greedy sequential vertex coloring heuristics
 
+**[Try the interactive demo](https://psanse.github.io/seq_coloring/)**: draw a graph and step through SEQ and ISEQ.
+
 Header-only C++ implementations of two greedy vertex coloring heuristics for undirected graphs, built on the bitset-based [BitGraph](https://github.com/psanse/BitGraph) library:
 
 | Class | Heuristic | Idea |
@@ -74,6 +76,7 @@ The demo executable `sequential_coloring` is written to `bin/`.
 src/seq_coloring.h     SEQ and ISEQ heuristics (header-only)
 src/main_seq.cpp       demo executable
 src/tests/             GoogleTest unit tests
+docs/index.html        interactive web demo (GitHub Pages)
 docs/logo.svg          project logo
 ```
 
