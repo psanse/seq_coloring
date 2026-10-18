@@ -65,7 +65,8 @@
   <h1>seq_coloring — SEQ vs ISEQ</h1>
   <p>Interactive demo of the two greedy vertex coloring heuristics from
      <a href="https://github.com/psanse/seq_coloring">psanse/seq_coloring</a>.
-     Draw your own graph and step through the algorithms. Vertices are numbered from 0 and colors from 1, as in the C++ code.</p>
+     Draw your own graph and step through the algorithms. Vertices are numbered from 0 and colors from 1, as in the C++ code.
+     Both algorithms process the vertices in index order here, so they produce exactly the same coloring.</p>
 </header>
 
 <main>
@@ -134,7 +135,8 @@
       <h2>How they differ</h2>
       <p style="margin:0 0 6px"><b>SEQ</b> goes <i>vertex by vertex</i> (index order) and gives each vertex the smallest color not used by an already colored neighbor.</p>
       <p style="margin:0"><b>ISEQ</b> goes <i>color by color</i>: it builds one independent set at a time, repeatedly taking the lowest-index candidate and discarding its neighbors from the candidates.
-         It needs just two bitsets. The two can yield different numbers of colors.</p>
+         It needs just two bitsets.</p>
+      <p style="margin:6px 0 0"><b>Same result:</b> if both process the vertices in the same sequence, SEQ and ISEQ assign <i>exactly the same colors</i>; they only build the coloring in a different order (vertex by vertex vs. color by color). Switch algorithm on any graph to check: the final colors never change.</p>
     </section>
   </div>
 </main>
