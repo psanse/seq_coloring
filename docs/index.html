@@ -1,13 +1,14 @@
 <!doctype html>
 <html lang="en">
 <head>
+<meta name="color-scheme" content="dark">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>seq_coloring — SEQ and ISEQ demo</title>
+<title>Heuristic Sequential Coloring</title>
 <style>
   :root {
-    --bg: #f6f8fb; --panel: #ffffff; --ink: #1e293b; --muted: #64748b; --line: #e2e8f0;
-    --edge: #94a3b8; --accent: #0284c7; --warn: #e11d48;
+    --bg: #0b1120; --panel: #111a2e; --ink: #e2e8f0; --muted: #94a3b8; --line: #263449;
+    --edge: #64748b; --accent: #38bdf8; --warn: #fb7185;
   }
   * { box-sizing: border-box; }
   body { margin: 0; background: var(--bg); color: var(--ink);
@@ -23,50 +24,90 @@
   .row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 10px; }
   .row:last-child { margin-bottom: 0; }
   button, select { font: inherit; padding: 5px 11px; border: 1px solid var(--line); border-radius: 8px;
-                   background: #fff; color: var(--ink); cursor: pointer; }
+                   background: #1a2640; color: var(--ink); cursor: pointer; }
   button:hover:not(:disabled) { border-color: var(--accent); }
   button:disabled { opacity: .45; cursor: default; }
-  button.on { background: var(--accent); border-color: var(--accent); color: #fff; }
+  button.on { background: var(--accent); border-color: var(--accent); color: #0b1120; }
   .seg { display: inline-flex; }
   .seg button { border-radius: 0; margin-left: -1px; }
   .seg button:first-child { border-radius: 8px 0 0 8px; margin-left: 0; }
   .seg button:last-child { border-radius: 0 8px 8px 0; }
   .label { color: var(--muted); font-size: .85rem; }
-  svg#g { width: 100%; height: auto; display: block; background: #fbfcfe; border-radius: 8px;
+  svg#g { width: 100%; height: auto; display: block; background: #0e1628; border-radius: 8px;
           border: 1px solid var(--line); touch-action: none; user-select: none; }
   svg#g.t-draw { cursor: crosshair; } svg#g.t-move { cursor: grab; } svg#g.t-erase { cursor: not-allowed; }
   .edge { stroke: var(--edge); stroke-width: 3; stroke-linecap: round; }
   .edge.blk { stroke: var(--warn); stroke-width: 4; }
-  .node circle { stroke: #475569; stroke-width: 2.5; transition: fill .25s; }
+  .node circle { stroke: #94a3b8; stroke-width: 2.5; transition: fill .25s; }
   .node text { font-weight: 700; font-size: 16px; text-anchor: middle; dominant-baseline: central; pointer-events: none; fill: #0f172a; }
   .node .idx { font-size: 10px; font-weight: 600; fill: var(--muted); }
   .node.cand circle { stroke: var(--accent); stroke-width: 4; stroke-dasharray: 5 3; }
-  .node.cur circle { stroke: #0f172a; stroke-width: 5; }
+  .node.cur circle { stroke: #f8fafc; stroke-width: 5; }
   .node.blk circle { stroke: var(--warn); stroke-width: 5; }
   .node.sel circle { stroke: var(--accent); stroke-width: 5; }
   #msg { min-height: 4.5em; margin: 0; }
   .chips { display: flex; flex-wrap: wrap; gap: 4px; }
   .chip { min-width: 26px; text-align: center; padding: 1px 7px; border-radius: 999px; border: 1px solid var(--line);
-          font-size: .85rem; font-weight: 600; background: #f1f5f9; }
-  .chip.cur { background: #0f172a; color: #fff; border-color: #0f172a; }
+          font-size: .85rem; font-weight: 600; background: #1a2640; }
+  .chip.cur { background: #f8fafc; color: #0b1120; border-color: #f8fafc; }
   .chip.done { opacity: .45; }
   .cls { display: flex; gap: 8px; align-items: center; margin: 4px 0; }
-  .sw { width: 22px; height: 22px; border-radius: 50%; border: 2px solid #475569; flex: none; text-align: center;
+  .sw { width: 22px; height: 22px; border-radius: 50%; border: 2px solid #94a3b8; flex: none; text-align: center;
         font-size: .75rem; font-weight: 700; line-height: 18px; color: #0f172a; }
   h2 { font-size: 1rem; margin: 0 0 6px; }
   .side { display: flex; flex-direction: column; gap: 16px; }
-  code { background: #f1f5f9; padding: 1px 5px; border-radius: 4px; }
+  code { background: #1a2640; padding: 1px 5px; border-radius: 4px; }
   .legend { color: var(--muted); font-size: .85rem; }
   input[type=range] { vertical-align: middle; }
+  /* ---- visual polish ---- */
+  body { background: radial-gradient(1200px 600px at 15% -10%, #16284a 0%, transparent 60%),
+                     radial-gradient(900px 500px at 100% 0%, #2a1a48 0%, transparent 55%), var(--bg);
+         background-attachment: fixed; min-height: 100vh; }
+  header { padding-top: 36px; }
+  h1 { font-size: clamp(1.8rem, 4vw, 2.6rem); font-weight: 800; letter-spacing: -.02em;
+       background: linear-gradient(90deg, #7dd3fc, #c4b5fd 55%, #fda4af); -webkit-background-clip: text;
+       background-clip: text; color: transparent; display: inline-block; }
+  header p { max-width: 80ch; font-size: .98rem; }
+  header p:first-of-type { color: var(--ink); font-size: 1.05rem; border-left: 3px solid var(--accent);
+       padding-left: 12px; margin-top: 12px; }
+  header b { color: #f1f5f9; }
+  .card { border-radius: 16px; box-shadow: 0 8px 28px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.04);
+          background: linear-gradient(180deg, #131d34, #0f1830); }
+  h2 { font-size: .8rem; text-transform: uppercase; letter-spacing: .09em; color: var(--muted); font-weight: 700; margin-bottom: 10px; }
+  h2 #ncol { color: var(--accent); }
+  button, select { transition: background .15s, border-color .15s, transform .1s; }
+  button:hover:not(:disabled) { background: #22314f; }
+  button:active:not(:disabled) { transform: translateY(1px); }
+  button.on { background: linear-gradient(135deg, #38bdf8, #818cf8); border-color: transparent; font-weight: 600; }
+  #play { background: linear-gradient(135deg, #38bdf8, #818cf8); border-color: transparent; color: #0b1120; font-weight: 700; min-width: 92px; }
+  #play:hover:not(:disabled) { background: linear-gradient(135deg, #7dd3fc, #a5b4fc); }
+  svg#g { background-color: #0a1222;
+          background-image: radial-gradient(#1c2a44 1.2px, transparent 1.2px); background-size: 24px 24px;
+          border-radius: 12px; }
+  .edge { transition: stroke .2s; }
+  .node circle { filter: drop-shadow(0 3px 5px rgba(0,0,0,.55)); }
+  .node.cur circle { filter: drop-shadow(0 0 9px rgba(248,250,252,.75)); }
+  .node.cand circle { filter: drop-shadow(0 0 7px rgba(56,189,248,.7)); }
+  .node.blk circle { filter: drop-shadow(0 0 8px rgba(251,113,133,.8)); }
+  #msg { background: #0c1527; border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; min-height: 5.5em; font-size: .93rem; }
+  .chip { transition: background .2s; }
+  .sw { box-shadow: 0 0 0 3px rgba(255,255,255,.05); }
+  .cls { padding: 3px 0; }
+  input[type=range] { accent-color: #818cf8; }
+  .chip[draggable=true] { cursor: grab; user-select: none; }
+  .chip.cand { border-color: var(--accent); border-style: dashed; }
+  .chip.over { outline: 2px solid var(--accent); }
+  .chip.dragging { opacity: .4; }
+  .ordtools { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+  .ordtools button { padding: 2px 9px; font-size: .85rem; }
+  .legend span::before { content: "●"; margin-right: 5px; }
 </style>
 </head>
 <body>
 <header>
-  <h1>seq_coloring — SEQ vs ISEQ</h1>
-  <p>Interactive demo of the two greedy vertex coloring heuristics from
-     <a href="https://github.com/psanse/seq_coloring">psanse/seq_coloring</a>.
-     Draw your own graph and step through the algorithms. Vertices are numbered from 0 and colors from 1, as in the C++ code.
-     Both algorithms process the vertices in index order here, so they produce exactly the same coloring.</p>
+  <h1>Heuristic Sequential Coloring</h1>
+  <p><b>SEQ</b> and <b>ISEQ</b> are greedy <b>sequential coloring heuristics</b>: they color vertices one after another, never undoing a choice.
+     Fast, but not optimal. <a href="https://github.com/psanse/seq_coloring">Source on GitHub</a>.</p>
 </header>
 
 <main>
@@ -91,9 +132,9 @@
     </div>
     <svg id="g" class="t-draw" viewBox="0 0 640 440"></svg>
     <div class="row legend" style="margin-top:8px">
-      <span>Dashed blue ring: ISEQ candidate</span><span>·</span>
-      <span>Black ring: vertex being processed</span><span>·</span>
-      <span>Red: conflicting neighbor (SEQ)</span>
+      <span>Dashed ring: candidate</span>
+      <span>White ring: current</span>
+      <span>Red: conflict</span>
     </div>
   </section>
 
@@ -122,8 +163,14 @@
     </section>
 
     <section class="card">
-      <h2 id="ordtitle">Processing order</h2>
+      <h2>Vertex order <span class="label" style="text-transform:none;letter-spacing:0;font-weight:400">(drag to reorder)</span></h2>
       <div class="chips" id="order"></div>
+      <div class="ordtools" id="ordtools">
+        <button data-o="index" title="0, 1, 2, ...">By number</button>
+        <button data-o="random">Random</button>
+        <button data-o="degdesc" title="Vertices with the most neighbors first">Most connected first</button>
+        <button data-o="degasc" title="Vertices with the fewest neighbors first">Least connected first</button>
+      </div>
     </section>
 
     <section class="card">
@@ -132,11 +179,10 @@
     </section>
 
     <section class="card">
-      <h2>How they differ</h2>
-      <p style="margin:0 0 6px"><b>SEQ</b> goes <i>vertex by vertex</i> (index order) and gives each vertex the smallest color not used by an already colored neighbor.</p>
-      <p style="margin:0"><b>ISEQ</b> goes <i>color by color</i>: it builds one independent set at a time, repeatedly taking the lowest-index candidate and discarding its neighbors from the candidates.
-         It needs just two bitsets.</p>
-      <p style="margin:6px 0 0"><b>Same result:</b> if both process the vertices in the same sequence, SEQ and ISEQ assign <i>exactly the same colors</i>; they only build the coloring in a different order (vertex by vertex vs. color by color). Switch algorithm on any graph to check: the final colors never change.</p>
+      <h2>SEQ vs ISEQ</h2>
+      <p style="margin:0 0 4px"><b>SEQ:</b> vertex by vertex, smallest free color.</p>
+      <p style="margin:0 0 4px"><b>ISEQ:</b> color by color, one independent set at a time.</p>
+      <p style="margin:0"><b>Same vertex order ⇒ exactly the same colors.</b></p>
     </section>
   </div>
 </main>
@@ -146,12 +192,18 @@
   'use strict';
   const PALETTE = ['#7dd3fc','#fda4af','#fcd34d','#86efac','#c4b5fd','#fdba74','#5eead4','#f9a8d4',
                    '#bef264','#a5b4fc','#fca5a5','#67e8f9','#d8b4fe','#fde68a'];
-  const colorOf = c => c === 0 ? '#ffffff' : PALETTE[(c - 1) % PALETTE.length];
+  const colorOf = c => c === 0 ? '#1a2640' : PALETTE[(c - 1) % PALETTE.length];
   const R = 22, W = 640, H = 440, NS = 'http://www.w3.org/2000/svg';
 
   // ---- graph model ----
   let nodes = [];          // {x, y}
   let edges = [];          // [a, b] with a < b
+  let order = [];          // processing order: permutation of the vertex indices
+  const syncOrder = () => {
+    const n = nodes.length, seen = new Set();
+    order = order.filter(v => v < n && !seen.has(v) && seen.add(v));
+    for (let v = 0; v < n; v++) if (!seen.has(v)) order.push(v);
+  };
   const adj = () => {
     const a = nodes.map(() => new Set());
     for (const [u, v] of edges) { a[u].add(v); a[v].add(u); }
@@ -166,6 +218,7 @@
   };
   const removeNode = k => {
     nodes.splice(k, 1);
+    order = order.filter(v => v !== k).map(v => v > k ? v - 1 : v);
     edges = edges.filter(([u, v]) => u !== k && v !== k).map(([u, v]) => [u > k ? u - 1 : u, v > k ? v - 1 : v]);
   };
 
@@ -190,6 +243,7 @@
       const n = 10; nodes = circ(n, W/2, H/2, 170);
       for (let i = 0; i < n; i++) for (let j = i + 1; j < n; j++) if (Math.random() < 0.3) edges.push([i, j]);
     } else { nodes = []; }
+    order = nodes.map((_, i) => i);
   }
 
   // ---- algorithms: precompute list of snapshots ----
@@ -199,8 +253,8 @@
     const n = nodes.length, A = adj(), col = new Array(n).fill(0), steps = [];
     const snap = o => steps.push(Object.assign({ colors: col.slice(), cur: -1, blk: [], cand: [], done: steps.length ? steps[steps.length-1].done.slice() : [] }, o));
     let k = 0;
-    snap({ msg: n ? 'SEQ: vertices are taken in index order. Each gets the smallest color not used by a colored neighbor.' : 'Add some vertices to begin.', done: [] });
-    for (let v = 0; v < n; v++) {
+    snap({ msg: n ? 'SEQ: vertices are taken in the order shown. Each gets the smallest color not used by a colored neighbor.' : 'Add some vertices to begin.', done: [] });
+    for (const v of order) {
       const parts = []; let chosen = 0, blk = [];
       for (let c = 1; c <= k + 1; c++) {
         const w = [...A[v]].filter(u => col[u] === c).sort((a, b) => a - b);
@@ -219,6 +273,7 @@
 
   function runISEQ() {
     const n = nodes.length, A = adj(), col = new Array(n).fill(0), steps = [];
+    const pos = []; order.forEach((v, i) => pos[v] = i);
     const unc = new Set(Array.from({ length: n }, (_, i) => i));
     const push = o => steps.push(Object.assign({ colors: col.slice(), cur: -1, blk: [], cand: [] }, o));
     push({ msg: n ? 'ISEQ: builds one independent set (color) at a time. Candidates start as all uncolored vertices.' : 'Add some vertices to begin.' });
@@ -228,12 +283,13 @@
       const cand = new Set(unc);
       push({ cand: [...cand], msg: `Open color ${k}. Candidates = all uncolored vertices {${fmt(cand)}}.` });
       while (cand.size) {
-        const v = Math.min(...cand);
+        let v = -1;
+        for (const x of cand) if (v < 0 || pos[x] < pos[v]) v = x;
         col[v] = k; unc.delete(v); cand.delete(v);
         const removed = [...A[v]].filter(u => cand.has(u));
         removed.forEach(u => cand.delete(u));
         push({ cur: v, blk: removed, cand: [...cand],
-          msg: `Color ${k}: take lowest candidate ${v}.` + (removed.length ? ` Its neighbors {${fmt(removed)}} leave the candidates.` : ' No candidate is adjacent to it.') +
+          msg: `Color ${k}: take first candidate in order: ${v}.` + (removed.length ? ` Its neighbors {${fmt(removed)}} leave the candidates.` : ' No candidate is adjacent to it.') +
                ` Candidates left: {${fmt(cand)}}.` });
       }
     }
@@ -246,7 +302,7 @@
   const $ = id => document.getElementById(id);
   const svg = $('g');
 
-  function recompute() { stop(); steps = alg === 'seq' ? runSEQ() : runISEQ(); si = Math.min(si, steps.length - 1); render(); }
+  function recompute() { stop(); syncOrder(); steps = alg === 'seq' ? runSEQ() : runISEQ(); si = Math.min(si, steps.length - 1); render(); }
   function reset() { si = 0; recompute(); }
   function stop() { if (timer) { clearInterval(timer); timer = null; } $('play').textContent = '▶ Play'; }
   function play() {
@@ -293,21 +349,22 @@
 
     // order panel
     const ord = $('order'); ord.textContent = '';
-    if (alg === 'seq') {
-      $('ordtitle').textContent = 'Processing order (vertex by vertex)';
-      const done = new Set(s.done || []);
-      nodes.forEach((_, i) => {
-        const c = document.createElement('span');
-        c.className = 'chip' + (s.cur === i ? ' cur' : done.has(i) ? ' done' : '');
-        c.textContent = i; ord.appendChild(c);
+    order.forEach((v, pos) => {
+      const c = document.createElement('span');
+      c.className = 'chip' + (s.cur === v ? ' cur' : s.colors[v] ? ' done' : cand.has(v) ? ' cand' : '');
+      c.textContent = v; c.draggable = true;
+      c.addEventListener('dragstart', e => { dragPos = pos; c.classList.add('dragging'); e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', String(pos)); });
+      c.addEventListener('dragend', () => c.classList.remove('dragging'));
+      c.addEventListener('dragover', e => { e.preventDefault(); c.classList.add('over'); });
+      c.addEventListener('dragleave', () => c.classList.remove('over'));
+      c.addEventListener('drop', e => {
+        e.preventDefault();
+        if (dragPos < 0 || dragPos === pos) return;
+        const [m] = order.splice(dragPos, 1); order.splice(pos, 0, m); dragPos = -1; reset();
       });
-    } else {
-      $('ordtitle').textContent = 'Current candidates (color by color)';
-      if (!cand.size) { ord.textContent = '—'; }
-      [...cand].sort((a, b) => a - b).forEach(i => {
-        const c = document.createElement('span'); c.className = 'chip'; c.textContent = i; ord.appendChild(c);
-      });
-    }
+      ord.appendChild(c);
+    });
+    if (!order.length) ord.textContent = '—';
 
     // classes panel
     const cls = $('classes'); cls.textContent = '';
@@ -337,7 +394,7 @@
   });
   const edited = () => { sel = -1; $('preset').value = 'empty'; reset(); };
 
-  let drag = -1;
+  let drag = -1, dragPos = -1;
   svg.addEventListener('pointerdown', ev => {
     const p = pt(ev), i = nodeAt(p);
     if (tool === 'draw') {
@@ -374,6 +431,15 @@
   });
   $('preset').addEventListener('change', () => { preset($('preset').value); sel = -1; reset(); });
   $('rand').addEventListener('click', () => { $('preset').value = 'random'; preset('random'); sel = -1; reset(); });
+  $('ordtools').addEventListener('click', ev => {
+    const b = ev.target.closest('button'); if (!b) return;
+    const deg = adj().map(a => a.size), o = b.dataset.o;
+    order = nodes.map((_, i) => i);
+    if (o === 'random') for (let i = order.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [order[i], order[j]] = [order[j], order[i]]; }
+    else if (o === 'degdesc') order.sort((a, b) => deg[b] - deg[a] || a - b);
+    else if (o === 'degasc') order.sort((a, b) => deg[a] - deg[b] || a - b);
+    reset();
+  });
   $('first').addEventListener('click', () => { stop(); si = 0; render(); });
   $('prev').addEventListener('click', () => { stop(); si = Math.max(0, si - 1); render(); });
   $('next').addEventListener('click', () => { stop(); si = Math.min(steps.length - 1, si + 1); render(); });
